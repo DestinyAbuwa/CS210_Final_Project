@@ -28,3 +28,20 @@ struct CityKeyHash {
         return hash<string>()(key.cityName) ^ hash<string>()(key.countryCode);
     }
 };
+
+// Least Recently Used Cache class for storing recent city lookups
+class CityCache {
+private:
+    // A list stores key-value pairs, with most recent at the front
+    list<pair<CityKey, string>> cacheList;
+    // Map from CityKey to list iterator for fast O(1) access
+    unordered_map<CityKey, list<pair<CityKey, string>>::iterator, CityKeyHash> cacheMap;
+    const size_t maxSize = 10;  // Only store 10 recent items
+
+};
+
+
+
+
+
+
