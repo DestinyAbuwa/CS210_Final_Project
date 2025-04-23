@@ -20,3 +20,11 @@ struct CityKey {
         return cityName == other.cityName && countryCode == other.countryCode;
     }
 };
+
+// Custom hash function for CityKey so we can use it in an unordered_map
+struct CityKeyHash {
+    size_t operator()(const CityKey& key) const {
+        // XOR hash of city and country strings (basic combination method)
+        return hash<string>()(key.cityName) ^ hash<string>()(key.countryCode);
+    }
+};
