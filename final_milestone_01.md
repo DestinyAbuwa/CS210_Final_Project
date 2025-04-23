@@ -101,6 +101,36 @@ bool searchCSV(const CityKey& key, string& population) {
     return false;  // Not found
 }
 
+int main() {
+    CityCache cache;  // Our LRU cache
+    string city, country;
 
+    while (true) {
+        cout << "\nEnter city name (or 'exit'): ";
+        getline(cin, city);
+        if (city == "exit") break;
+
+        cout << "Enter country code: ";
+        getline(cin, country);
+
+        CityKey key = {country, city};  // Build lookup key
+        string population;
+
+        // First check the cache
+        if (cache.get(key, population)) {
+            cout << "(Cache) Population of " << city << ", " << country << ": " << population << endl;
+        }
+        // If not in cache, search the file
+        else if (searchCSV(key, population)) {
+            cout << "(File) Population of " << city << ", " << country << ": " << population << endl;
+            cache.put(key, population);  // Add result to cache
+        }
+        else {
+            cout << "City not found." << endl;
+        }
+    }
+
+    return 0;
+}
 
 
