@@ -51,6 +51,28 @@ public:
         return false;  // Cache miss
     }
 
+    // Add or update a value in the cache
+    void put(const CityKey& key, const string& population) {
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) {
+            // If key already exists, remove old entry
+            cacheList.erase(it->second);
+            cacheMap.erase(it);
+        }
+        // Insert new item at the front of the list
+        cacheList.push_front({key, population});
+        // Update the map to point to the new list position
+        cacheMap[key] = cacheList.begin();
+
+        // Remove least recently used item if we go over size
+        if (cacheList.size() > maxSize) {
+            auto last = cacheList.end();
+            last--;
+            cacheMap.erase(last->first);  // Remove from map
+            cacheList.pop_back();         // Remove from list
+        }
+    }
+
 };
 
 
