@@ -76,6 +76,30 @@ public:
 };
 
 
+// Search the CSV file line-by-line for a matching city
+bool searchCSV(const CityKey& key, string& population) {
+    ifstream file("world_cities.csv");
+    if (!file.is_open()) return false;  // Couldn't open file
+
+    string line;
+    getline(file, line); // Skip the header line
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string country, city, pop;
+
+        // Parse CSV columns
+        getline(ss, country, ',');
+        getline(ss, city, ',');
+        getline(ss, pop, ',');
+
+        // Match input key with line from CSV
+        if (key.countryCode == country && key.cityName == city) {
+            population = pop;
+            return true;  // Match found
+        }
+    }
+    return false;  // Not found
+}
 
 
 
