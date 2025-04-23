@@ -38,6 +38,19 @@ private:
     unordered_map<CityKey, list<pair<CityKey, string>>::iterator, CityKeyHash> cacheMap;
     const size_t maxSize = 10;  // Only store 10 recent items
 
+public:
+    // Try to get a value from the cache
+    bool get(const CityKey& key, string& population) {
+        auto it = cacheMap.find(key);  // Check if key is in cache
+        if (it != cacheMap.end()) {
+            // Move found item to the front of the list (most recent)
+            cacheList.splice(cacheList.begin(), cacheList, it->second);
+            population = it->second->second;  // Get the population from the list
+            return true;  // Cache hit
+        }
+        return false;  // Cache miss
+    }
+
 };
 
 
