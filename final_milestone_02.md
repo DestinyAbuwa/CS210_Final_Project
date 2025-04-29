@@ -47,5 +47,66 @@ public:
 };
 
 
+// ------------------- LFU Cache --------------------
+
+// Least Frequently Used (LFU) cache implementation
+class LFUCache : public CityCache {
+private:
+    // Internal structure to represent each cache entry
+    struct CacheEntry {
+        string population;
+        int frequency; // Track how often a city is accessed (frequency count)
+        list<CityKey>::iterator orderIt; // Iterator to maintain insertion order
+    };
+
+    unordered_map<CityKey, CacheEntry, CityKeyHash> cacheMap; // Map to store city data
+    list<CityKey> orderList; // List to store city access order (used for frequency eviction)
+    const size_t maxSize = 10; // Maximum cache size
+
+public:
+    // Get city population from cache, updating frequency if found
+    bool get(const CityKey& key, string& population) override {
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) {
+            it->second.frequency++; // Increment frequency when accessed
+            population = it->second.population;
+            return true;
+        }
+        return false; // Return false if city is not in the cache
+    }
+
+    // Put city data into the cache
+    void put(const CityKey& key, const string& population) override {
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) {
+            it->second.population = population; // Update population if city is already in cache
+            it->second.frequency++; // Increment frequency
+            return;
+        }
+
+        // If the cache is full, evict the least frequently used city
+        if (cacheMap.size() >= maxSize) {
+            int minFreq = numeric_limits<int>::max();
+            CityKey toRemove;
+
+            // Find city with the minimum frequency for eviction
+            for (const auto& k : orderList) {
+                int freq = cacheMap[k].frequency;
+                if (freq < minFreq) {
+                    minFreq = freq;
+                    toRemove = k;
+                }
+            }
+
+            // Remove the least frequently used city from cache
+            orderList.remove(toRemove);
+            cacheMap.erase(toRemove);
+        }
+
+        // Add the new city to the cache and update frequency
+        orderList.push_back(key);
+        cacheMap[key] = {population, 1, --orderList.end()}; // Frequency starts at 1
+    }
+};
 
 
