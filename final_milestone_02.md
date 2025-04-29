@@ -198,4 +198,29 @@ public:
     }
 };
 
+// ------------------- CSV Lookup Function --------------------
 
+// Search for the city in the CSV file and retrieve its population
+bool searchCSV(const CityKey& key, string& population) {
+    ifstream file("world_cities.csv"); // Open CSV file
+    if (!file.is_open()) return false; // Return false if file can't be opened
+
+    string line;
+    getline(file, line); // Skip header line
+    while (getline(file, line)) { // Read each line in the CSV
+        stringstream ss(line);
+        string country, city, pop;
+
+        // Extract country, city, and population from the CSV line
+        getline(ss, country, ',');
+        getline(ss, city, ',');
+        getline(ss, pop, ',');
+
+        // If the city and country match, return its population
+        if (key.countryCode == country && key.cityName == city) {
+            population = pop;
+            return true;
+        }
+    }
+    return false; // Return false if the city isn't found
+}
