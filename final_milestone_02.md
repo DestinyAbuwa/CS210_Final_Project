@@ -149,3 +149,53 @@ public:
         cacheMap[key] = --cacheList.end(); // Update the map with the new iterator
     }
 };
+
+// ------------------- Random Cache --------------------
+
+// Random replacement cache implementation
+class RandomCache : public CityCache {
+private:
+    unordered_map<CityKey, string, CityKeyHash> cacheMap; // Map for storing cache entries
+    vector<CityKey> keys; // Vector to track the keys for random eviction
+    const size_t maxSize = 10; // Maximum cache size
+    random_device rd; // Random device for generating random numbers
+    mt19937 gen; // Random number generator
+
+public:
+    // Constructor to initialize random number generator
+    RandomCache() : gen(rd()) {}
+
+    // Get city population from cache
+    bool get(const CityKey& key, string& population) override {
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) {
+            population = it->second;
+            return true;
+        }
+        return false; // Return false if city is not in the cache
+    }
+
+    // Put city data into the cache
+    void put(const CityKey& key, const string& population) override {
+        if (cacheMap.find(key) != cacheMap.end()) {
+            cacheMap[key] = population; // Update population if city exists in cache
+            return;
+        }
+
+        // If the cache is full, evict a random city
+        if (cacheMap.size() >= maxSize) {
+            uniform_int_distribution<> dis(0, keys.size() - 1);
+            int idx = dis(gen); // Select a random index
+            CityKey toRemove = keys[idx];
+
+            cacheMap.erase(toRemove); // Remove the randomly selected city
+            keys.erase(keys.begin() + idx); // Remove from keys list
+        }
+
+        // Add the new city to the cache
+        keys.push_back(key);
+        cacheMap[key] = population; // Store population in map
+    }
+};
+
+
