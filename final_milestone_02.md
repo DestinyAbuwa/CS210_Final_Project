@@ -224,3 +224,51 @@ bool searchCSV(const CityKey& key, string& population) {
     }
     return false; // Return false if the city isn't found
 }
+
+int main() {
+    unique_ptr<CityCache> cache; // Create a pointer to the cache
+    int choice;
+
+    // Prompt user for cache strategy selection
+    cout << "Select caching strategy:\n";
+    cout << "1. LFU (Least Frequently Used)\n";
+    cout << "2. FIFO (First-In, First-Out)\n";
+    cout << "3. Random Replacement\n";
+    cout << "Enter choice: ";
+    cin >> choice;
+    cin.ignore();  // clear newline
+
+    // Initialize cache based on user's choice
+    if (choice == 1) cache = make_unique<LFUCache>();
+    else if (choice == 2) cache = make_unique<FIFOCache>();
+    else if (choice == 3) cache = make_unique<RandomCache>();
+    else {
+        cout << "Invalid choice.\n";
+        return 1;
+    }
+
+    while (true) {
+        string city, country;
+        cout << "\nEnter city name (or 'exit'): ";
+        getline(cin, city); // Get city name from user
+        if (city == "exit") break; // Exit if user types 'exit'
+
+        cout << "Enter country code: ";
+        getline(cin, country); // Get country code from user
+
+        CityKey key = {country, city}; // Create a CityKey with the entered city and country
+        string population;
+
+        // Check if population is in cache, else look up in CSV file
+        if (cache->get(key, population)) {
+            cout << "(Cache) Population of " << city << ", " << country << ": " << population << endl;
+        } else if (searchCSV(key, population)) {
+            cout << "(File) Population of " << city << ", " << country << ": " << population << endl;
+            cache->put(key, population); // Add the city to cache
+        } else {
+            cout << "City not found.\n"; // If city is not found in the file
+        }
+    }
+
+    return 0;
+}
