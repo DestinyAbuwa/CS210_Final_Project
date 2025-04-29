@@ -34,3 +34,18 @@ struct CityKeyHash {
         return hash<string>()(key.cityName) ^ hash<string>()(key.countryCode); // Combine hashes of cityName and countryCode
     }
 };
+
+// ------------------- Base Cache Interface --------------------
+
+// Abstract base class for city population caches
+class CityCache {
+public:
+    // Virtual methods to be overridden in derived classes (get and put data into the cache)
+    virtual bool get(const CityKey& key, string& population) = 0;
+    virtual void put(const CityKey& key, const string& population) = 0;
+    virtual ~CityCache() {}
+};
+
+
+
+
