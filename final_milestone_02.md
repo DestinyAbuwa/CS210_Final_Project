@@ -109,4 +109,43 @@ public:
     }
 };
 
+// ------------------- FIFO Cache --------------------
 
+// First-In, First-Out (FIFO) cache implementation
+class FIFOCache : public CityCache {
+private:
+    list<pair<CityKey, string>> cacheList; // List to maintain cache order (FIFO)
+    unordered_map<CityKey, list<pair<CityKey, string>>::iterator, CityKeyHash> cacheMap; // Map for quick lookup
+    const size_t maxSize = 10; // Maximum cache size
+
+public:
+    // Get city population from cache
+    bool get(const CityKey& key, string& population) override {
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) {
+            population = it->second->second;
+            return true;
+        }
+        return false; // Return false if city is not in the cache
+    }
+
+    // Put city data into the cache
+    void put(const CityKey& key, const string& population) override {
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) {
+            cacheList.erase(it->second); // Remove the city from the list if it exists
+            cacheMap.erase(it); // Remove from the map
+        }
+
+        // If the cache is full, evict the oldest city (FIFO)
+        if (cacheList.size() >= maxSize) {
+            auto last = cacheList.front(); // FIFO, so remove the first city
+            cacheMap.erase(last.first);
+            cacheList.pop_front();
+        }
+
+        // Add the new city to the cache
+        cacheList.push_back({key, population});
+        cacheMap[key] = --cacheList.end(); // Update the map with the new iterator
+    }
+};
