@@ -257,3 +257,57 @@ void loadCSVtoTrie(const string& filename, CityTrie& trie) {
 
     cout << "Loaded cities into Trie.\n";
 }
+
+int main() {
+    unique_ptr<CityCache> cache; // Polymorphic cache
+    CityTrie trie;
+    int choice;
+
+    loadCSVtoTrie("world_cities.csv", trie); // Load file once at start
+
+    // Let user pick a cache strategy
+    cout << "Select caching strategy:\n";
+    cout << "1. LFU (Least Frequently Used)\n";
+    cout << "2. FIFO (First-In, First-Out)\n";
+    cout << "3. Random Replacement\n";
+    cout << "Enter choice: ";
+    cin >> choice;
+    cin.ignore();
+
+    // Create cache based on user choice
+    if (choice == 1) cache = make_unique<LFUCache>();
+    else if (choice == 2) cache = make_unique<FIFOCache>();
+    else if (choice == 3) cache = make_unique<RandomCache>();
+    else {
+        cout << "Invalid choice.\n";
+        return 1;
+    }
+
+    // Loop: allow users to search for city populations
+    while (true) {
+        string city, country;
+        cout << "\nEnter city name (or 'exit'): ";
+        getline(cin, city);
+        if (city == "exit") break;
+
+        cout << "Enter country code: ";
+        getline(cin, country);
+
+        CityKey key = {country, city};
+        string population;
+
+        // Try to find in cache
+        if (cache->get(key, population)) {
+            cout << "(Cache) Population of " << city << ", " << country << ": " << population << endl;
+        }
+        // Else fall back to trie
+        else if (trie.search(city, country, population)) {
+            cout << "(Trie) Population of " << city << ", " << country << ": " << population << endl;
+            cache->put(key, population); // Save in cache
+        } else {
+            cout << "City not found.\n";
+        }
+    }
+
+    return 0;
+}
