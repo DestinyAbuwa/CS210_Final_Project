@@ -177,3 +177,58 @@ public:
     }
 };
 
+// ------------------- Trie Node Definition --------------------
+// Each node represents a letter and stores children and country-population map
+struct TrieNode {
+    unordered_map<char, TrieNode*> children;
+    map<string, string> countryPopMap; // countryCode -> population
+};
+
+// Trie to store cities efficiently
+class CityTrie {
+private:
+    TrieNode* root;
+
+public:
+    CityTrie() {
+        root = new TrieNode();
+    }
+
+    // Insert a city-country-population into the trie
+    void insert(const string& city, const string& country, const string& population) {
+        TrieNode* node = root;
+        for (char ch : city) {
+            if (!node->children[ch])
+                node->children[ch] = new TrieNode();
+            node = node->children[ch];
+        }
+        node->countryPopMap[country] = population;
+    }
+
+    // Search the trie for a given city and country
+    bool search(const string& city, const string& country, string& population) {
+        TrieNode* node = root;
+        for (char ch : city) {
+            if (!node->children.count(ch))
+                return false;
+            node = node->children[ch];
+        }
+        auto it = node->countryPopMap.find(country);
+        if (it != node->countryPopMap.end()) {
+            population = it->second;
+            return true;
+        }
+        return false;
+    }
+
+    // Cleanup all nodes
+    ~CityTrie() {
+        clear(root);
+    }
+
+    void clear(TrieNode* node) {
+        for (auto& pair : node->children)
+            clear(pair.second);
+        delete node;
+    }
+};
