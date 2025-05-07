@@ -232,3 +232,28 @@ public:
         delete node;
     }
 };
+
+
+// ------------------- Load Trie From CSV --------------------
+// Read the world_cities.csv file and load data into the trie
+void loadCSVtoTrie(const string& filename, CityTrie& trie) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cerr << "Failed to open file: " << filename << endl;
+        return;
+    }
+
+    string line;
+    getline(file, line); // Skip header
+
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string country, city, population;
+        getline(ss, country, ',');
+        getline(ss, city, ',');
+        getline(ss, population, ',');
+        trie.insert(city, country, population); // Insert into trie
+    }
+
+    cout << "Loaded cities into Trie.\n";
+}
